@@ -423,8 +423,9 @@ func (c *Cache) increaseSize(delta uint64) {
 
 // decreaseSize decreases size by delta.
 func (c *Cache) decreaseSize(delta uint64) {
-	size := atomic.LoadUint64(&c.size)
-	atomic.StoreUint64(&c.size, size-delta)
+	// Since there isn't an explicit atomic operation for subtraction,
+	// use addition and overflow to effectively subtract delta from c.size.
+	atomic.AddUint64(&c.size, math.MaxUint64-delta+1)
 }
 
 // MaxSize returns the maximum number of bytes the cache may consume.
